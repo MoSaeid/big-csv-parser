@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Data</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .pagination a {
+      margin: 0 5px;
+      padding: 8px 16px;
+      border: 1px solid #ccc;
+      text-decoration: none;
+      color: #333;
+    }
+    .pagination a.active {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    .pagination a:hover:not(.active) {
+      background-color: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSV Data</h1>
+  <form method="get" action="/view">
+    <input type="text" name="search" value="<%= searchQuery %>" placeholder="Search...">
+    <button type="submit">Search</button>
+  </form>
+  <table>
+    <thead>
+      <tr>
+        <% if (data.length > 0) { %>
+          <% Object.keys(data[0]).forEach(key => { %>
+            <th><%= key %></th>
+          <% }) %>
+        <% } %>
+      </tr>
+    </thead>
+    <tbody>
+      <% data.forEach(row => { %>
+        <tr>
+          <% Object.values(row).forEach(value => { %>
+            <td><%= value %></td>
+          <% }) %>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <div class="pagination">
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <a href="/view?page=<%= i %>&search=<%= searchQuery %>" class="<%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+    <% } %>
+  </div>
+  <script>
+    document.querySelectorAll('.pagination a').forEach(link => {
+      link.addEventListener('click', event => {
+        event.preventDefault();
+        const page = event.target.getAttribute('href').split('page=')[1].split('&')[0];
+        const searchQuery = document.querySelector('input[name="search"]').value;
+        fetch(`/view?page=${page}&search=${searchQuery}`)
+          .then(response => response.text())
+          .then(html => {
+            document.body.innerHTML = html;
+          });
+      });
+    });
+  </script>
+</body>
+</html>
